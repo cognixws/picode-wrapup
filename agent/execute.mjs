@@ -9,7 +9,7 @@ import { effectiveConfig } from "../lib/config.mjs";
 import { normalize, validate } from "../lib/validate.mjs";
 import { redactReport } from "../lib/redact.mjs";
 import { reportId } from "../lib/ids.mjs";
-import { render, counts } from "../lib/render.mjs";
+import { render } from "../lib/render.mjs";
 import { guide } from "../lib/guide.mjs";
 
 export const PROTOCOL = "picode-tools/1";
@@ -31,13 +31,12 @@ export function handle(request) {
   if (problems.length) {
     return fail(["The report was not accepted. Fix these and call submit again:", ...problems.map((p) => `- ${p}`)].join("\n"));
   }
-  const { report: clean, count: redactions } = redactReport(report);
+  const { report: clean } = redactReport(report);
   const id = reportId(request.context?.agent, clean);
-  const c = counts(clean.items);
-  return {
-    content: [text(REPLY_HINT), text(render(clean, id, cfg))],
-    structuredContent: { id, counts: c, redactions, recorded: false },
-  };
+  // Text only: Claude Code shows structuredContent instead of the text when
+  // both are present (live matrix, 2026-10-02), and Pi/Omp never show it. The
+  // id travels in the rendered text.
+  return { content: [text(REPLY_HINT), text(render(clean, id, cfg))] };
 }
 
 async function main() {

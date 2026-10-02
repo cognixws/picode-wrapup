@@ -69,15 +69,14 @@ test("submit returns the reply hint and the rendered report", () => {
   assert.equal(out.content.length, 2);
   assert.match(out.content[1].text, /^\*\*Site\*\*\n/);
   assert.match(out.content[1].text, /\nR-[A-Z2-7]{10}$/);
-  assert.match(out.structuredContent.id, /^R-[A-Z2-7]{10}$/);
-  assert.deepEqual(out.structuredContent.counts, { done: 1, caveat: 0, needs_you: 1 });
-  assert.equal(out.structuredContent.recorded, false);
+  assert.equal(out.structuredContent, undefined, "text only: Claude Code would show structuredContent instead");
   assert.deepEqual(listing(pkg), before, "the executor wrote inside the package");
 });
 
 test("the same report from the same agent gets the same id", () => {
-  const a = parseResult(call(request("submit", report))).structuredContent.id;
-  const b = parseResult(call(request("submit", report))).structuredContent.id;
+  const id = (r) => r.content[1].text.match(/R-[A-Z2-7]{10}$/)[0];
+  const a = id(parseResult(call(request("submit", report))));
+  const b = id(parseResult(call(request("submit", report))));
   assert.equal(a, b);
 });
 

@@ -1,63 +1,167 @@
 {
   "id": "wrapup",
   "name": "Wrap-up",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 2,
   "publisher": "COGNIX[SE]",
   "description": "Agents close a block of work with a status report in checks: grouped by area, each item done and verified, done with a caveat, or pending with you.",
   "icon": "icons/wrapup.svg",
   "settings": [
-    {"key": "marker_done", "label": "Marker: done and verified", "type": "text", "default": "✅"},
-    {"key": "marker_caveat", "label": "Marker: done with a caveat", "type": "text", "default": "⚠️"},
-    {"key": "marker_needs_you", "label": "Marker: pending with you", "type": "text", "default": "⬜"},
-    {"key": "area_style", "label": "Area headings", "type": "select", "options": ["bold", "heading", "plain"], "default": "bold", "description": "bold: **Area**. heading: ### Area. plain: the name alone."},
-    {"key": "require_done_note", "label": "Done needs how it was verified", "type": "boolean", "default": true, "description": "Refuse a done item without a note saying how it was verified (command, test, URL or file)."},
-    {"key": "refuse_vague_notes", "label": "Refuse vague verification notes", "type": "boolean", "default": true, "description": "Refuse notes such as ok, tested or works that do not say what was run or opened."},
-    {"key": "areas", "label": "Preferred areas", "type": "text", "default": "", "description": "Comma-separated area names agents should use, for example: Backend, UI, Docs. Agents read them through the guide tool."},
-    {"key": "extra_rules", "label": "Extra rules for agents", "type": "text", "default": "", "description": "Anything else agents should follow when they write a report. Agents read it through the guide tool."}
+    {
+      "key": "marker_done",
+      "label": "Marker: done and verified",
+      "type": "text",
+      "default": "✅"
+    },
+    {
+      "key": "marker_caveat",
+      "label": "Marker: done with a caveat",
+      "type": "text",
+      "default": "⚠️"
+    },
+    {
+      "key": "marker_needs_you",
+      "label": "Marker: pending with you",
+      "type": "text",
+      "default": "⬜"
+    },
+    {
+      "key": "area_style",
+      "label": "Area headings",
+      "type": "select",
+      "options": [
+        "bold",
+        "heading",
+        "plain"
+      ],
+      "default": "bold",
+      "description": "bold: **Area**. heading: ### Area. plain: the name alone."
+    },
+    {
+      "key": "require_done_note",
+      "label": "Done needs how it was verified",
+      "type": "boolean",
+      "default": true,
+      "description": "Refuse a done item without a note saying how it was verified (command, test, URL or file)."
+    },
+    {
+      "key": "refuse_vague_notes",
+      "label": "Refuse vague verification notes",
+      "type": "boolean",
+      "default": true,
+      "description": "Refuse notes such as ok, tested or works that do not say what was run or opened."
+    },
+    {
+      "key": "areas",
+      "label": "Preferred areas",
+      "type": "text",
+      "default": "",
+      "description": "Comma-separated area names agents should use, for example: Backend, UI, Docs. Agents read them through the guide tool."
+    },
+    {
+      "key": "extra_rules",
+      "label": "Extra rules for agents",
+      "type": "text",
+      "default": "",
+      "description": "Anything else agents should follow when they write a report. Agents read it through the guide tool."
+    }
   ],
   "agent": {
-    "executor": {"protocol": "picode-tools/1", "command": "node", "args": ["${extensionDir}/agent/execute.mjs"]},
-    "skills": ["skills/status-report"],
-    "capabilities": [{
-      "id": "report",
-      "label": "Status report",
-      "description": "Report finished work to the human as a done / caveat / needs-you checklist grouped by area.",
-      "tools": [
-        {
-          "id": "submit",
-          "description": "Send the human a status report and get it formatted as a checklist grouped by area. Call it when you finish a block of work, or when the human asks what was done or for a status (\"o que foi feito?\"). Each item is exactly one of: done = finished AND verified (note: how you verified it: command, test, URL or file); caveat = finished but something was not verified or may be wrong (note: what was NOT verified); needs_you = a decision or action only the human can take. Work you did not finish is a caveat saying it was not done, never needs_you. If you did not run or check it, it is a caveat, not done. Write title, area, text and note in the language of the conversation. Reply to the human with the result unchanged as your final answer. This reports outcomes; it is not the checklist (plan) tool. Call guide first if unsure of the rules.",
-          "inputSchema": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["title", "items"],
-            "properties": {
-              "title": {"type": "string", "minLength": 1, "maxLength": 100, "description": "What this block of work was. No status words, no markers."},
-              "items": {
-                "type": "array", "minItems": 1, "maxItems": 40,
-                "description": "One entry per outcome, in any order: they are grouped by area. At most 8 different areas.",
+    "executor": {
+      "protocol": "picode-tools/1",
+      "command": "node",
+      "args": [
+        "${extensionDir}/agent/execute.mjs"
+      ]
+    },
+    "skills": [
+      "skills/status-report"
+    ],
+    "capabilities": [
+      {
+        "id": "report",
+        "label": "Status report",
+        "description": "Report finished work to the human as a done / caveat / needs-you checklist grouped by area.",
+        "tools": [
+          {
+            "id": "submit",
+            "description": "Send the human a status report and get it formatted as a checklist grouped by area. Call it when you finish a block of work, or when the human asks what was done or for a status (\"o que foi feito?\"). Each item is exactly one of: done = finished AND verified (note: how you verified it: command, test, URL or file); caveat = finished but something was not verified or may be wrong (note: what was NOT verified); needs_you = a decision or action only the human can take. Work you did not finish is a caveat saying it was not done, never needs_you. If you did not run or check it, it is a caveat, not done. Something the human told you not to do is not a caveat. Report outcomes of the work, not your messages or bookkeeping. Write title, area, text and note in the language of the conversation. Reply to the human with the result unchanged as your final answer. This reports outcomes; it is not the checklist (plan) tool. Call guide first if unsure of the rules.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "items"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "What this block of work was. No status words, no markers."
+                },
                 "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["area", "status", "text"],
-                  "properties": {
-                    "area": {"type": "string", "minLength": 1, "maxLength": 40, "description": "Short area name (Backend, UI, Docs, Infra, Tests). Spell the same area the same way. Put what the human owes under one area of its own."},
-                    "status": {"type": "string", "enum": ["done", "caveat", "needs_you"], "description": "done: finished and verified. caveat: finished, something not verified, or not finished. needs_you: a decision or action the human owes."},
-                    "text": {"type": "string", "minLength": 1, "maxLength": 200, "description": "One line: what. For needs_you: what the human must decide or do."},
-                    "note": {"type": "string", "maxLength": 200, "description": "done: how you verified it. caveat: what you did NOT verify or did not finish. needs_you: options or deadline."}
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 40,
+                  "description": "One entry per outcome, in any order: they are grouped by area. At most 8 different areas.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "area",
+                      "status",
+                      "text"
+                    ],
+                    "properties": {
+                      "area": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40,
+                        "description": "Short area name (Backend, UI, Docs, Infra, Tests). Spell the same area the same way. Put what the human owes under one area of its own."
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "done",
+                          "caveat",
+                          "needs_you"
+                        ],
+                        "description": "done: finished and verified. caveat: finished, something not verified, or not finished. needs_you: a decision or action the human owes."
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "description": "One line: what. For needs_you: what the human must decide or do."
+                      },
+                      "note": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "description": "done: how you verified it. caveat: what you did NOT verify or did not finish. needs_you: options or deadline."
+                      }
+                    }
                   }
+                },
+                "replaces": {
+                  "type": "string",
+                  "maxLength": 16,
+                  "description": "Optional: the id (R-...) of your earlier report that this one corrects."
                 }
-              },
-              "replaces": {"type": "string", "maxLength": 16, "description": "Optional: the id (R-...) of your earlier report that this one corrects."}
+              }
+            }
+          },
+          {
+            "id": "guide",
+            "description": "Returns the human's current status-report rules (markers, required notes, preferred areas, extra rules), how to call submit from a shell, and a filled example. Call it before your first submit in a session or after a submit is refused.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
             }
           }
-        },
-        {
-          "id": "guide",
-          "description": "Returns the human's current status-report rules (markers, required notes, preferred areas, extra rules), how to call submit from a shell, and a filled example. Call it before your first submit in a session or after a submit is refused.",
-          "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false}
-        }
-      ]
-    }]
+        ]
+      }
+    ]
   }
 }
